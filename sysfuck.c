@@ -41,11 +41,11 @@ int main (int argc, char **argv) {
 			*p++ = c;
 		}
 
-		buf_t buf = * (buf_t*) data;
+		buf_t *buf = (buf_t*) data;
 
 		printf("As a number, the argument is %d\n", (int)*(int*)data);
 	
-		long ret = syscall(str_to_syscall(callname), buf);
+		long ret = syscall(str_to_syscall(callname), *buf);
 
 		printf("%ld\n", ret);
 	}
