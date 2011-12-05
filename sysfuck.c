@@ -6,11 +6,7 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 
-int str_to_syscall (const char *str) {
-	if (! strcmp("brk", str))
-		return __NR_brk;
-	return -1;
-}
+#include "str_to_syscall.c"
 
 typedef struct {
 	char buf[255];
