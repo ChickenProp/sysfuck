@@ -1,8 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-//#include <readline/readline.h>
-//#include <readline/history.h>
 #include <sys/syscall.h>
 #include <unistd.h>
 
