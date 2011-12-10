@@ -4,11 +4,7 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 
-#include "str_to_syscall.c"
-
-typedef struct {
-	char buf[255];
-} buf_t;
+#include "callbacks.h"
 
 int main (int argc, char **argv) {
 	char *callname = NULL;
@@ -19,27 +15,8 @@ int main (int argc, char **argv) {
 		if (bytesread == -1)
 			return 0;
 
-		int arglen = getchar();
-		if (arglen == -1)
-			return 0;
-
-		printf("call %s with %d bytes\n", callname, arglen);
-	
-		char *data = malloc(255);
-		memset(data, 0, 255);
-
-		char *p = data;
-		while (p - data < arglen) {
-			int c = getchar();
-			if (c == -1) break;
-			*p++ = c;
-		}
-
-		buf_t *buf = (buf_t*) data;
-
-		printf("As a number, the argument is %d\n", (int)*(int*)data);
-	
-		long ret = syscall(str_to_syscall(callname), *buf);
+		callback_t f = getcallback(callname);
+		long ret = (*f)(callname);
 
 		printf("%ld\n", ret);
 	}
