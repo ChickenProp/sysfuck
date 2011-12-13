@@ -16,9 +16,9 @@ int main (int argc, char **argv) {
 			return 0;
 
 		callback_t f = getcallback(callname);
-		long ret = (*f)(callname);
-
-		printf("%ld\n", ret);
+		int n = getarg(data);
+		(*f)(callname, n, &buf);
+		fflush(stdout);
 	}
 
 	return 0;
