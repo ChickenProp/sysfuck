@@ -63,7 +63,8 @@ while (my $line = <STDIN>) {
 		}
 		default {
 			read $in, my $str, 4;
-			print bytes2long($str), "\n";
+			my $num = bytes2long($str);
+			printf("%d (0x%x)\n", $num, $num);
 		}
 	}
 }
