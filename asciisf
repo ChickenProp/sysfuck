@@ -1,0 +1,77 @@
+#! /usr/bin/perl
+use warnings;
+use strict;
+use IPC::Open2;
+use Parse::RecDescent;
+use Data::Dumper;
+use feature 'switch';
+
+sub hex2str {
+	my $hex = shift;
+	
+	if (length($hex) % 2) {
+		$hex = '0' . $hex;
+	}
+	pack( 'H' . length($hex), $hex);
+}
+
+sub bytes2long {
+	unpack "L", shift;
+}
+
+my $grammar = q{
+call: name '(' bytes ')'
+    { \%item }
+
+name: /\\w+/
+    { $item[1] }
+
+bytes: bytesprime(s)
+    { join('', @{$item[1]}) }
+
+bytesprime:
+    string
+        { $item[1] }
+    | hex
+        { $item[1] }
+string:
+    "'" name  "'"
+        { $item{name} }
+    | '"' name'"'
+        { $item{name} }
+
+hex: /[0-9a-fA-F]+/
+    { ::hex2str($item[1]) }
+  };
+
+my $parser = new Parse::RecDescent($grammar);
+
+my $pid = open2(my $in, my $out, "./sysfuck");
+
+while (my $line = <STDIN>) {
+	my %parsed = %{ $parser->call($line) };
+	my $name = $parsed{name};
+	my $bytes = $parsed{bytes};
+	
+	print $out $name, chr(0), chr(length $bytes), $bytes;
+
+	given ($name) {
+		when ("memwrite") { next; }
+		when ("memread") {
+			read $in, my $str, bytes2long(substr($bytes, 4, 4));
+			print "$str\n";
+		}
+		default {
+			read $in, my $str, 4;
+			print bytes2long($str), "\n";
+		}
+	}
+}
+
+
+
+
+
+
+
+
