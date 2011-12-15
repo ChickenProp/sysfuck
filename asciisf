@@ -12,7 +12,7 @@ sub hex2str {
 	if (length($hex) % 2) {
 		$hex = '0' . $hex;
 	}
-	pack( 'H' . length($hex), $hex);
+	scalar reverse pack( 'H' . length($hex), $hex);
 }
 
 sub bytes2long {
@@ -26,7 +26,7 @@ call: name '(' bytes ')'
 name: /\\w+/
     { $item[1] }
 
-bytes: bytesprime(s)
+bytes: bytesprime(s?)
     { join('', @{$item[1]}) }
 
 bytesprime:
@@ -49,7 +49,8 @@ my $parser = new Parse::RecDescent($grammar);
 my $pid = open2(my $in, my $out, "./sysfuck");
 
 while (my $line = <STDIN>) {
-	my %parsed = %{ $parser->call($line) };
+	next if $line =~ /^\s*$/;
+	my %parsed = %{ $parser->call($line) or warn("Syntax error\n"), next };
 	my $name = $parsed{name};
 	my $bytes = $parsed{bytes};
 	
