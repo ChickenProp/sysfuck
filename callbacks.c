@@ -8,31 +8,8 @@
 #include "callbacks.h"
 #include "str_to_syscall.c"
 
-buf_t buf;
-char *data = buf.data;
 int g_argc;
 char **g_argv;
-
-int getarg (char *store) {
-	int arglen = getchar();
-	if (arglen == -1)
-		return 0;
-
-	char *p = store;
-	while (p - store < arglen) {
-		int c = getchar();
-		if (c == -1) break;
-		*p++ = c;
-	}
-
-	return arglen;
-}
-
-void printlong (long n) {
-	char *s = (char *) &n;
-	printf("%c%c%c%c", s[0], s[1], s[2], s[3]);
-}
-
 
 callback_t getcallback (const char *str) {
 	if (! strcmp("memread", str))

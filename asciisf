@@ -12,11 +12,15 @@ sub hex2str {
 	if (length($hex) % 2) {
 		$hex = '0' . $hex;
 	}
+	# reverse to make it little-endian.
 	scalar reverse pack( 'H' . length($hex), $hex);
 }
 
 sub bytes2long {
-	unpack "L", shift;
+	# If there are fewer than 4 bytes, assume they're the low-order ones, so
+	# pad with NUL bytes at the end.
+	my $str = shift . "\0"x4;
+	unpack "L", $str;
 }
 
 my $grammar = q{
@@ -69,11 +73,3 @@ while (my $line = <STDIN>) {
 		}
 	}
 }
-
-
-
-
-
-
-
-
