@@ -10,6 +10,8 @@
 
 buf_t buf;
 char *data = buf.data;
+int g_argc;
+char **g_argv;
 
 int getarg (char *store) {
 	int arglen = getchar();
@@ -31,11 +33,16 @@ void printlong (long n) {
 	printf("%c%c%c%c", s[0], s[1], s[2], s[3]);
 }
 
+
 callback_t getcallback (const char *str) {
 	if (! strcmp("memread", str))
 		return memread;
 	if (! strcmp("memwrite", str))
 		return memwrite;
+	if (! strcmp("argc", str))
+		return argc;
+	if (! strcmp("argv", str))
+		return argv;
 	return syscallback;
 }
 
@@ -62,4 +69,16 @@ void memwrite (const char *name, int n, buf_t *buf) {
 	char *src = buf->data + 4;
 
 	memmove(dest, src, n - 4);
+}
+
+void argc (const char *name, int n, buf_t *buf) {
+	printlong(g_argc);
+}
+
+void argv (const char *name, int n, buf_t *buf) {
+	int i;
+	for (i = 0; i < n; i += 4) {
+		unsigned long idx = * (unsigned long *) (buf->data + i);
+		printlong((long) g_argv[idx]);
+	}
 }

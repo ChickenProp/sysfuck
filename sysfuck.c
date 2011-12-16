@@ -7,6 +7,9 @@
 #include "callbacks.h"
 
 int main (int argc, char **argv) {
+	g_argc = argc;
+	g_argv = argv;
+
 	char *callname = NULL;
 	size_t n = 0;
 
