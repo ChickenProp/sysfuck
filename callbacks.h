@@ -15,5 +15,7 @@ void memread (const char *name, int n, buf_t *buf);
 void memwrite (const char *name, int n, buf_t *buf);
 void argc (const char *name, int n, buf_t *buf);
 void argv (const char *name, int n, buf_t *buf);
+void c_getenv (const char *name, int n, buf_t *buf);
+void c_strlen (const char *name, int n, buf_t *buf);
 
 #endif
