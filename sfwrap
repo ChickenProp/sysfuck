@@ -16,8 +16,11 @@ if len(sys.argv) >= 2 and sys.argv[1][0:2] == '-c':
         sf_command = sys.argv[1][2:]
         prog_argv = sys.argv[2:]
 
-prog_process = Popen(prog_argv, stdin=PIPE, stdout=PIPE)
 os.dup2(0, 3)
 os.dup2(1, 4)
+
+prog_process = Popen(prog_argv, stdin=PIPE, stdout=PIPE)
 sf_process = Popen(prog_argv, executable=sf_command,
                    stdin=prog_process.stdout, stdout=prog_process.stdin)
+
+prog_process.wait()
