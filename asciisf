@@ -69,7 +69,7 @@ while (my $line = <STDIN>) {
 		default {
 			read $in, my $str, 4;
 			my $num = bytes2long($str);
-			printf("%d (0x%x)\n", $num, $num);
+			printf("%u (0x%x)\n", $num, $num);
 		}
 	}
 }
