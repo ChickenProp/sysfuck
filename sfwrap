@@ -1,0 +1,23 @@
+#! /usr/bin/python
+
+import os
+import sys
+from subprocess import Popen, PIPE
+
+sf_command = 'sysfuck'
+prog_argv = sys.argv[1:]
+
+# Check whether we're specifying the sysfuck command path explicitly.
+if len(sys.argv) >= 2 and sys.argv[1][0:2] == '-c':
+    if len(sys.argv[1]) == 2: # It's in a separate argument.
+        sf_command = sys.argv[2]
+        prog_argv = sys.argv[3:]
+    else: # It's like '-c/path/to/sysfuck'.
+        sf_command = sys.argv[1][2:]
+        prog_argv = sys.argv[2:]
+
+prog_process = Popen(prog_argv, stdin=PIPE, stdout=PIPE)
+os.dup2(0, 3)
+os.dup2(1, 4)
+sf_process = Popen(prog_argv, executable=sf_command,
+                   stdin=prog_process.stdout, stdout=prog_process.stdin)
