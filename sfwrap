@@ -16,11 +16,28 @@ if len(sys.argv) >= 2 and sys.argv[1][0:2] == '-c':
         sf_command = sys.argv[1][2:]
         prog_argv = sys.argv[2:]
 
+# We want the controlling program to be able to communicate with the user, but
+# stdin and stdout go to sysfuck. So we open new file descriptors to use
+# instead, so the program can read(3, ...) and write(4, ...).
 os.dup2(0, 3)
 os.dup2(1, 4)
 
 prog_process = Popen(prog_argv, stdin=PIPE, stdout=PIPE)
+# Specifying the executable separately means it doesn't get included in the
+# sysfuck process' argv, which is what we want.
 sf_process = Popen(prog_argv, executable=sf_command,
                    stdin=prog_process.stdout, stdout=prog_process.stdin)
 
-prog_process.wait()
+# If sysfuck exits but these are still open, the controlling program will hang
+# when it tries to talk to sysfuck, because it's talking on a pipe which has
+# both ends still open. By closing these, when sysfuck dies the pipes will only
+# have one end, and trying to read or write on them will fail immediately.
+prog_process.stdout.close()
+prog_process.stdin.close()
+
+# By default, if the user presses ^C we get a python error message. The
+# try/catch suppresses that.
+try:
+    prog_process.wait()
+except KeyboardInterrupt:
+    pass

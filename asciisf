@@ -54,6 +54,8 @@ my $user_out = IO::Handle->new_from_fd(4, '>>');
 
 $|++;
 
+print $user_out "> ";
+
 while (my $line = <$user_in>) {
 	next if $line =~ /^\s*$/;
 	my %parsed = %{ $parser->call($line) or warn("Syntax error\n"), next };
@@ -74,4 +76,6 @@ while (my $line = <$user_in>) {
 			printf $user_out ("%u (0x%x)\n", $num, $num);
 		}
 	}
+
+	print $user_out "> ";
 }
