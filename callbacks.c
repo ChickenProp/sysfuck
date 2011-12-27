@@ -57,11 +57,8 @@ void argc (const char *name, int n, buf_t *buf) {
 }
 
 void argv (const char *name, int n, buf_t *buf) {
-	int i;
-	for (i = 0; i < n; i += 4) {
-		unsigned long idx = * (unsigned long *) (buf->data + i);
-		printlong((long) g_argv[idx]);
-	}
+	unsigned long idx = * (buf->data);
+	printlong((long) g_argv[idx]);
 }
 
 // For simplicity of implementation, this can only be used for environment
