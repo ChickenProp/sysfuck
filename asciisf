@@ -1,14 +1,13 @@
 #! /usr/bin/perl
 use warnings;
 use strict;
-use IPC::Open2;
 use Parse::RecDescent;
-use Data::Dumper;
+use IO::Handle;
 use feature 'switch';
 
 sub hex2str {
 	my $hex = shift;
-	
+
 	if (length($hex) % 2) {
 		$hex = '0' . $hex;
 	}
@@ -50,26 +49,29 @@ hex: /[0-9a-fA-F]+/
 
 my $parser = new Parse::RecDescent($grammar);
 
-my $pid = open2(my $in, my $out, "./sysfuck");
+my $user_in = IO::Handle->new_from_fd(3, '<');
+my $user_out = IO::Handle->new_from_fd(4, '>>');
 
-while (my $line = <STDIN>) {
+$|++;
+
+while (my $line = <$user_in>) {
 	next if $line =~ /^\s*$/;
 	my %parsed = %{ $parser->call($line) or warn("Syntax error\n"), next };
 	my $name = $parsed{name};
 	my $bytes = $parsed{bytes};
-	
-	print $out $name, chr(0), chr(length $bytes), $bytes;
+
+	print $name, chr(0), chr(length $bytes), $bytes;
 
 	given ($name) {
 		when ("memwrite") { next; }
 		when ("memread") {
-			read $in, my $str, bytes2long(substr($bytes, 4, 4));
-			print "$str\n";
+			read STDIN, my $str, bytes2long(substr($bytes, 4, 4));
+			print $user_out "$str\n";
 		}
 		default {
-			read $in, my $str, 4;
+			read STDIN, my $str, 4;
 			my $num = bytes2long($str);
-			printf("%u (0x%x)\n", $num, $num);
+			printf $user_out ("%u (0x%x)\n", $num, $num);
 		}
 	}
 }
