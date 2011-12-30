@@ -28,10 +28,9 @@ prog_process = Popen(prog_argv, stdin=PIPE, stdout=PIPE)
 sf_process = Popen(prog_argv, executable=sf_command,
                    stdin=prog_process.stdout, stdout=prog_process.stdin)
 
-# If sysfuck exits but these are still open, the controlling program will hang
-# when it tries to talk to sysfuck, because it's talking on a pipe which has
-# both ends still open. By closing these, when sysfuck dies the pipes will only
-# have one end, and trying to read or write on them will fail immediately.
+# If one side of the pipeline exits but these are still open, then when the
+# other side tries to do a read it will hang because it's listening on a pipe
+# which has both ends open. By closing these, the read will fail immediately.
 prog_process.stdout.close()
 prog_process.stdin.close()
 
