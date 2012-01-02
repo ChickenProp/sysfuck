@@ -7,6 +7,7 @@ typedef void (*callback_t)(const char *name, int n, buf_t *buf);
 
 int g_argc;
 char **g_argv;
+int fake_stdout;
 
 callback_t getcallback(const char *str);
 
@@ -17,5 +18,6 @@ void argc (const char *name, int n, buf_t *buf);
 void argv (const char *name, int n, buf_t *buf);
 void c_getenv (const char *name, int n, buf_t *buf);
 void c_strlen (const char *name, int n, buf_t *buf);
+void c_stdout (const char *name, int n, buf_t *buf);
 
 #endif

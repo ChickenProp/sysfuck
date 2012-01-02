@@ -18,9 +18,22 @@ int main (int argc, char **argv) {
 	size_t n = 0;
 
 	while (1) {
+		int c;
+		while ((c = getchar())) {
+			if (c == EOF)
+				return 0;
+			else
+				write(fake_stdout, &c, 1);
+		}
+
 		int bytesread = getdelim(&callname, &n, 0, stdin);
 		if (bytesread == -1)
 			return 0;
+		else if (bytesread == 1) {
+			char null = 0;
+			write(fake_stdout, &null, 1);
+			continue;
+		}
 
 		callback_t f = getcallback(callname);
 		int n = getarg(data);
@@ -41,7 +54,7 @@ int getarg (char *store) {
 	char *p = store;
 	while (p - store < arglen) {
 		int c = getchar();
-		if (c == -1) break;
+		if (c == EOF) break;
 		*p++ = c;
 	}
 

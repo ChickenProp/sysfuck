@@ -62,7 +62,7 @@ while (my $line = <$user_in>) {
 	my $name = $parsed{name};
 	my $bytes = $parsed{bytes};
 
-	print $name, chr(0), chr(length $bytes), $bytes;
+	print "\0$name\0", chr(length $bytes), $bytes;
 
 	given ($name) {
 		when ("memwrite") { next; }

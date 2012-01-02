@@ -10,6 +10,7 @@
 
 int g_argc;
 char **g_argv;
+int fake_stdout = 4;
 
 callback_t getcallback (const char *str) {
 	if (! strcmp("memread", str))
@@ -24,6 +25,8 @@ callback_t getcallback (const char *str) {
 		return c_getenv;
 	if (! strcmp("strlen", str))
 		return c_strlen;
+	if (! strcmp("stdout", str))
+		return c_stdout;
 	return syscallback;
 }
 
@@ -71,4 +74,8 @@ void c_getenv (const char *name, int n, buf_t *buf) {
 void c_strlen (const char *name, int n, buf_t *buf) {
 	char *str = (char *) * (long *) buf;
 	printlong(strlen(str));
+}
+
+void c_stdout (const char *name, int n, buf_t *buf) {
+	fake_stdout = * (int *) buf;
 }
