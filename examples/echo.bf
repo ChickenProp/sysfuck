@@ -1,10 +1,15 @@
-#! /usr/bin/bf
+#! /usr/bin/cmd -c bff "$0"
+[+]
 [
 This program is intended to be run under sfwrap, as in
     $ sfwrap /pathto/echo.bf [ args... ]
 As the name suggests, it will simply echo its arguments to stdout. I think it
 should work under 8- and 16-bit brainfucks, but I've only tested it with one
 interpreter, bff (http://www.swapped.cc/bff/) which is 32-bit.
+
+The bizzare shebang line is because bff doesn't gracefully handle having
+multiple command-line arguments; see https://github.com/ChickenProp/cmd .
+The [+] on the second line is because there's a - in the shebang line.
 
 The general layout is:
 
