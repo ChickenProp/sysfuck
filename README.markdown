@@ -50,7 +50,7 @@ To make a syscall, print
 
 * followed by the data itself.
 
-The data will usually contain four bytes for each argument that the syscall expects. The first four bytes give the first argument; the next four give the second argument; and so on. Most (maybe all?) arguments to syscalls are of `int`, `long`, or pointer type, or some type equivalent to one of these (such as `size_t`). Since `sysfuck` is compiled in 32-bit mode, these all take four bytes even on a 64-bit system. If you find a syscall that takes a `char` argument, you would only pass one byte for it.
+The data will contain up to four bytes for each argument that the syscall expects. The first four bytes give the first argument; the next four give the second argument; and so on. `sysfuck` is compiled in 32-bit mode, so all arguments to syscalls have a size of four bytes.
 
 For example, to make the C syscall
 
@@ -62,7 +62,7 @@ you would print, assuming a little-endian architecture, the following hexadecima
 
 ('write' means to print the five bytes `77 `(w) `72` (r) etc.) Here `0c` is twelve, the number of bytes that follow; `02 00 00 00` is the first argument, 2; `78 56 34 12` is the second argument; and `04 01 00 00` is the final argument.
 
-The syscall's return value is written to your program's standard input as four bytes. If the above call succeeded, it would return 260, so you would read the bytes `04 01 00 0`0. If it only wrote 20 bytes, you would read `14 00 00 00`.
+The syscall's return value is written to your program's standard input as four bytes. If the above call succeeded, it would return 260, so you would read the bytes `04 01 00 00`. If it only wrote 20 bytes, you would read `14 00 00 00`.
 
 If the data is smaller than the syscall expects, it will be padded with NUL bytes at the end. So the above call could also have been
 
@@ -78,7 +78,7 @@ As well as syscalls, there are some other commands available. You call them in e
 
     00 'memwrite' 00 06 78 56 34 12 ca fe
 
-will cause the two bytes `ca fe` to be written to memory location 0x12345678. Because this function is variadic, the number of bytess sent is significant; null padding is not performed. Nothing is sent to standard input.
+will cause the two bytes `ca fe` to be written to memory location 0x12345678. Because this function is variadic, the number of bytes sent is significant; null padding is not performed. Nothing is "returned", ie. written to standard input.
 
 * `strlen(char *ptr)` - this is just an interface to the C standard library function.
 
@@ -92,7 +92,7 @@ will cause the two bytes `ca fe` to be written to memory location 0x12345678. Be
 
 will return a pointer to a null-terminated string containing your home directory. Due to implementation details, you can only pass a string of up to 25**4** characters in length; if you try to pass a string of length 255, the final byte will be truncated.
 
-* `stdout(int fd)` - set the file descriptor that output from the program gets sent to. The default is 1.
+* `stdout(int fd)` - set the file descriptor that output from the program gets sent to. The default is 1. Like `memwrite`, nothing is returned.
 
 ## Examples
 
@@ -145,10 +145,6 @@ If `program` exits, then `sysfuck` will detect an EOF on its read handle and wil
 
 * I don't know whether it's possible to usefully use `fork()`, since you would immediately get two processes reading from and writing to the same pipes.
 
-* `sfwrap` has no way to distinguish between `sfwrap interpreter program` and `sfwrap program`. So specifying an interpreter on the command line will produce a different `argv` to specifying an interpreter with a shebang (`#!`) line or using a compiled program. You can also specify `sfwrap` in the shebang line, like
-
-    #! /usr/bin/sfwrap interpreter
-
-In this case, `interpreter` will be included in the `argv`.
+* `sfwrap` has no way to distinguish between `sfwrap interpreter program` and `sfwrap program`. So specifying an interpreter on the command line will produce a different `argv` to specifying an interpreter with a shebang (`#!`) line or using a compiled program. You can also specify `sfwrap` in the shebang line, like `#! /usr/bin/sfwrap interpreter`. In this case, `interpreter` will be included in the `argv`.
 
 * When using `sfwrap`, a keyboard interrupt will by default simply cause the program to exit with status 0. I'm not sure whether this can be overriden.
