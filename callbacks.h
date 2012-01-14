@@ -5,10 +5,6 @@
 
 typedef void (*callback_t)(const char *name, int n, buf_t *buf);
 
-int g_argc;
-char **g_argv;
-int prog_stdout;
-
 callback_t getcallback(const char *str);
 
 void syscallback (const char *name, int n, buf_t *buf);

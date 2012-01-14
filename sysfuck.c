@@ -9,8 +9,14 @@
 
 buf_t buf;
 char *data = buf.data;
+
+int g_argc;
+char **g_argv;
+
 FILE *sf_in;
 FILE *sf_out;
+int prog_stdout = 1;
+
 
 int main (int argc, char **argv) {
 	g_argc = argc;

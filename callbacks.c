@@ -9,10 +9,6 @@
 #include "callbacks.h"
 #include "str_to_syscall.c"
 
-int g_argc;
-char **g_argv;
-int prog_stdout = 1;
-
 callback_t getcallback (const char *str) {
 	if (! strcmp("memread", str))
 		return memread;
