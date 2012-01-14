@@ -60,7 +60,7 @@ you would print, assuming a little-endian architecture, the following hexadecima
 
     00 'write' 00 0c 02 00 00 00 78 56 34 12 04 01 00 00
 
-('write' means to print the five bytes `77 `(w) `72` (r) etc.) Here `0c` is twelve, the number of bytes that follow; `02 00 00 00` is the first argument, 2; `78 56 34 12` is the second argument; and `04 01 00 00` is the final argument.
+(`'write'` means to print the five bytes `77 `(w) `72` (r) etc.) Here `0c` is twelve, the number of bytes that follow; `02 00 00 00` is the first argument, 2; `78 56 34 12` is the second argument; and `04 01 00 00` is the final argument.
 
 The syscall's return value is written to your program's standard input as four bytes. If the above call succeeded, it would return 260, so you would read the bytes `04 01 00 00`. If it only wrote 20 bytes, you would read `14 00 00 00`.
 
