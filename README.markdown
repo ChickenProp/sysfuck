@@ -92,4 +92,63 @@ will cause the two bytes `ca fe` to be written to memory location 0x12345678. Be
 
 will return a pointer to a null-terminated string containing your home directory. Due to implementation details, you can only pass a string of up to 25**4** characters in length; if you try to pass a string of length 255, the final byte will be truncated.
 
-* `stdout(int fd)` - set the file descriptor that output from the program gets sent to.
+* `stdout(int fd)` - set the file descriptor that output from the program gets sent to. The default is 1.
+
+## Examples
+
+Three examples are provided in the `examples/` directory, to be run under `sfwrap`.
+
+* `echo.bf` is a replacement for `echo` in brainfuck, but without any fancy features. You should either compile it or edit the shebang (`#!`) line to point to whatever brainfuck interpreter you use; if you run it as `sfwrap my-brainfuck-interpreter echo.bf` then "echo.bf" will be treated as one of the arguments to echo. (See "Caveats" below.)
+
+It's been tested with the [bff](http://www.swapped.cc/bff/) interpreter, but hopefully works with others. Unfortunately `bff` doesn't handle command line arguments nicely, so the current shebang line uses my [`cmd`](https://github.com/ChickenProp/cmd) utility to avoid that.
+
+* `asciisf` is a perl script that lets you interact with `sysfuck` in a human-readable manner. It takes input in the format `name(data)`. Here `name` is the name of the syscall, and `data` is a whitespace-separated sequence of hex numbers and quoted strings. So `memwrite(12345678 'hello' 0)` sends `00 'memwrite' 00 0a 78 56 34 12 'hello' 00` to `sysfuck`.
+
+`asciisf` doesn't use Readline, but you can do `rlwrap sfwrap asciisf`. (But not `sfwrap rlwrap asciisf`.)
+
+* `test-sfwrap.pl` is just a simple nonexhaustive test program. It should print "this should get printed" to stdout; then "with a null byte(\0) on fd 5" to file descriptor 5 (call `sfwrap examples/test-sfwrap.pl 5>&1` to see this); followed by the first three bytes of its `argv[0]`.
+
+Also in examples is `bindump.pl`, even though it's not really an example. It's useful for testing `sfwrap` on a lower level than `asciisf` can. It's basically a reverse hexdump, and takes input in the form of hex numbers and quoted strings, like `asciisf`'s data. (But with `bindump.pl`, hex numbers greater than `ff` are printed big-endianly, which is uncool.)
+
+## Building and installing
+
+If you have SCons installed, you can build sysfuck by simply running `scons`. If not, you can do it yourself with these shell commands:
+
+    ./gen_str_to_syscall.sh
+    gcc -o callbacks.o -c -m32 -Wall callbacks.c
+    gcc -o sysfuck.o -c -m32 -Wall sysfuck.c
+    gcc -o sysfuck sysfuck.o callbacks.o
+
+You should probably copy `sfwrap` and `sysfuck` into your PATH. If `sysfuck` is not in your PATH, you can tell `sfwrap` where to find it with `sfwrap -c /path/to/sysfuck program ...`.
+
+## How it works
+
+`sysfuck` is essentially a UNIX filter: it takes input (as described above), and produces output (as described above). But in between it makes syscalls. Additionally, it reads and writes on file descriptors 3 and 4 instead of stdin and stdout respectively. This is so that stdin and stdout can still be used to talk to the terminal when `sysfuck` is being controlled by another process.
+
+`sfwrap program args...` executes `program` with the specified arguments, but under the following conditions:
+
+* stdin and stdout are redirected to talk to a `sysfuck` process. This process has file descriptors 3 and 4 opened to talk to `program`, and its argv is replaced with `program args...`. (In particular, "sysfuck" does not appear in the argv; `argv[0]` is "program".)
+
+* File descriptors 3 and 4 are opened to wherever stdin and stdout went originally. If you need to use sysfuck, you probably can't use these, but they're there just in case. `asciisf` uses them.
+
+* The utility `stdbuf` is used to stop `program` from performing output buffering, to prevent deadlock. This affects programs which use the functions in `stdio.h`, which is most of them.
+
+(Buffering causes deadlock because if `program` attempts to make a syscall and read the result, but the output is buffered so that no data is actually sent, then both `program` and `sysfuck` will hang waiting for the other to say something.)
+
+If `program` exits, then `sysfuck` will detect an EOF on its read handle and will exit with status 0. If `sysfuck` exits (possibly from calling `exit()` or from a segmentation fault), then SIGHUP is sent to `program` unless that process has already quit; `sfwrap` then exits with the same status as `sysfuck`.
+
+## Caveats
+
+* Be aware that many syscalls are wrapped by glibc, and sysfuck does not provide the wrapped version. One difference is that syscalls signal errors by returning negative error codes, where glibc sets `errno`. For example, a C call to `write()` might return -1 and set `errno` to `EBADF`; the syscall itself will simply return `-EBADF`. Sometimes this has other consequences: the direct syscall `getpriority()` returns a value `n` between 1 and 40 on success; the glibc wrapper returns `20 - n`. Consulting man pages is advised.
+
+* There's no way to get the value of macros like EBADF. You just have to know  (or look up) what they are.
+
+* I don't know whether it's possible to usefully use `fork()`, since you would immediately get two processes reading from and writing to the same pipes.
+
+* `sfwrap` has no way to distinguish between `sfwrap interpreter program` and `sfwrap program`. So specifying an interpreter on the command line will produce a different `argv` to specifying an interpreter with a shebang (`#!`) line or using a compiled program. You can also specify `sfwrap` in the shebang line, like
+
+    #! /usr/bin/sfwrap interpreter
+
+In this case, `interpreter` will be included in the `argv`.
+
+* When using `sfwrap`, a keyboard interrupt will by default simply cause the program to exit with status 0. I'm not sure whether this can be overriden.
