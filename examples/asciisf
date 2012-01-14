@@ -65,7 +65,7 @@ while (my $line = <$user_in>) {
 	print "\0$name\0", chr(length $bytes), $bytes;
 
 	given ($name) {
-		when ("memwrite") { next; }
+		when (["memwrite", "stdout"]) {}
 		when ("memread") {
 			read STDIN, my $str, bytes2long(substr($bytes, 4, 4));
 			print $user_out "$str\n";
