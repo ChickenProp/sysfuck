@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/syscall.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "callbacks.h"
 #include "str_to_syscall.c"
@@ -31,7 +32,12 @@ callback_t getcallback (const char *str) {
 }
 
 void syscallback (const char *callname, int n, buf_t *buf) {
+	/* If the syscall returns < 0, syscall() returns -1 and sets errno to
+	 * -ret. So we undo this. */
+	errno = 0;
 	long ret = syscall(str_to_syscall(callname), *buf);
+	if (errno && ret == -1)
+		ret = -errno;
 	sendlong(ret);
 }
 
