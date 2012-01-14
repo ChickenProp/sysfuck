@@ -20,20 +20,28 @@ if len(sys.argv) >= 2 and sys.argv[1][0:2] == '-c':
 # We want the controlling program to be able to communicate with the user, but
 # stdin and stdout go to sysfuck. So we open new file descriptors to use
 # instead, so the program can read(3, ...) and write(4, ...).
+
+# sysfuck needs file descriptors 3 and 4, and dup2() is the only way that I know
+# of to make sure they're available.
 os.dup2(0, 3)
 os.dup2(1, 4)
 
 prog_process = Popen(stdbuf_argv + prog_argv, stdin=PIPE, stdout=PIPE)
+
+os.dup2(prog_process.stdout.fileno(), 3)
+os.dup2(prog_process.stdin.fileno(), 4)
+
 # Specifying the executable separately means it doesn't get included in the
 # sysfuck process' argv, which is what we want.
-sf_process = Popen(prog_argv, executable=sf_command,
-                   stdin=prog_process.stdout, stdout=prog_process.stdin)
+sf_process = Popen(prog_argv, executable=sf_command)
 
 # If one side of the pipeline exits but these are still open, then when the
 # other side tries to do a read it will hang because it's listening on a pipe
 # which has both ends open. By closing these, the read will fail immediately.
 prog_process.stdout.close()
 prog_process.stdin.close()
+os.close(3)
+os.close(4)
 
 # By default, if the user presses ^C we get a python error message. The
 # try/catch suppresses that.

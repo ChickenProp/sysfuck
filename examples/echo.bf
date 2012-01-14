@@ -34,7 +34,7 @@ So we decrement NUMARGS, then start the loop:
     increment INDEX
     read ARG = argv(INDEX) into cells 32-35
     read LEN = strlen(ARG) into cells 36-39
-    write LEN bytes starting at position ARG to fd 4 (stdout)
+    write LEN bytes starting at position ARG to fd 1 (stdout)
     read and discard the result
     decrement NUMARGS
   print a newline
@@ -164,9 +164,9 @@ print ARG
 read STRLEN into cells 36 to 39
   >,>,>,>,
 
-print \0 WRITE \0 \12 \4 \0 \0 \0
+print \0 WRITE \0 \12 \1 \0 \0 \0
   <<<<<<<<<<<<<<<<<<<
-  . <<<<< .>.>.>.>.> . ++++++++++++ . -------- . ---- . . .
+  . <<<<< .>.>.>.>.> . ++++++++++++ . ----------- . - . . .
 
 print ARG LEN
   >>>>>>>>>>>> .>.>.>.>.>.>.>.

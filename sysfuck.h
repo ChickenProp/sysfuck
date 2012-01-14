@@ -7,8 +7,12 @@ typedef struct {
 
 buf_t buf;
 char *data;
+FILE *sf_in;
+FILE *sf_out;
+int user_out_fd;
 
 int getarg (char *store);
-void printlong (long n);
+void sendbytes (void *src, int n);
+void sendlong (long n);
 
 #endif
