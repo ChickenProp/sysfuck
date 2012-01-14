@@ -14,6 +14,6 @@ print "\0argv", map { chr } qw(0 4 0 0 0 0);
 my $n = read STDIN, (my $ptr), 4;
 
 print "\0write",
-  (map { chr } qw(0 12 4 0 0 0)),
+  (map { chr } qw(0 12 1 0 0 0)),
   $ptr,
   (map { chr } qw(3 0 0 0));
