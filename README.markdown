@@ -148,3 +148,5 @@ If `program` exits, then `sysfuck` will detect an EOF on its read handle and wil
 * `sfwrap` has no way to distinguish between `sfwrap interpreter program` and `sfwrap program`. So specifying an interpreter on the command line will produce a different `argv` to specifying an interpreter with a shebang (`#!`) line or using a compiled program. You can also specify `sfwrap` in the shebang line, like `#! /usr/bin/sfwrap interpreter`. In this case, `interpreter` will be included in the `argv`.
 
 * When using `sfwrap`, a keyboard interrupt will by default simply cause the program to exit with status 0. I'm not sure whether this can be overriden.
+
+* When you pass a byte to sysfuck to be printed (ie. a non-NULL byte), sysfuck does not check for errors after attempting to print it, so there's no guarantee that it worked.
